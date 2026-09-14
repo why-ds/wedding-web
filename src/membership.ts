@@ -14,7 +14,7 @@ async function read<T>(response: Response): Promise<T> {
 export async function memberRequest<T>(path: string, method='GET', body?: unknown): Promise<T> {
   const headers: Record<string,string>={};
   if (method!=='GET') {
-    const csrf=await read<{headerName:string;token:string}>(await fetch('/api/v1/auth/csrf',{credentials:'same-origin',cache:'no-store'}));
+    const csrf=await read<{headerName:string;token:string}>(await fetch('/api/v1/auth/csrf',{credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(20000)}));
     headers[csrf.headerName]=csrf.token;
     if(body!==undefined&&!(body instanceof FormData)) headers['Content-Type']='application/json';
   }

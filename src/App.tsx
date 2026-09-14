@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowDownUp, ArrowRight, Building2, CalendarDays, Check, ChevronRight, CircleHelp, Heart, MapPin, Search, SlidersHorizontal, Users, X, Camera, Gem, Sparkles, Shirt, Flower2, Scale, Leaf, RotateCcw } from 'lucide-react';
 import { defaults, initialCriteria, search, type Criteria, type Estimate } from './api';
 import AccountDialog from './AccountDialog';
+import Brand from './Brand';
 import { useMembership } from './membership';
 
 const won = (value: string | number) => `${Number(value).toLocaleString('ko-KR')}원`;
@@ -40,7 +41,7 @@ export default function App() {
   const complete=visible.filter(e=>e.totalMax!==null);
   return <>
     <header className="header"><div className="header-inner">
-      <a className="brand" href="/" aria-label="연 홈">연<span>YEON</span><i>함께 고르는 결혼 준비</i></a>
+      <a className="site-brand" href="/" aria-label="All About Wedding 홈"><Brand/><i>함께 고르는 결혼 준비</i></a>
       <nav aria-label="주 메뉴"><button className={!onlySaved?'nav-active':''} onClick={()=>setOnlySaved(false)}>업체 둘러보기</button><button className={onlySaved?'nav-active':''} onClick={()=>setOnlySaved(true)}><Heart size={16}/>찜한 업체 <span>{favorites.length}</span></button></nav>
       <button className="member-button" disabled={!membership.ready||membership.saving} onClick={()=>setAccountOpen(true)}><Users size={15}/><span>{!membership.ready?'확인 중…':membership.member?`${membership.member.displayName}님`:'로그인 · 회원가입'}</span></button>
       {membership.member?.admin&&<a className="member-button" href="/admin">관리자</a>}
@@ -72,7 +73,7 @@ export default function App() {
         <div className="applied"><Check size={14}/>{criteria.date.replaceAll('-','.')} · {criteria.time} · 성인 {criteria.guests}명 · {criteria.beverages?'주류 포함':'주류 제외'}<span>부가세 포함</span></div>
         {onlySaved&&<div className="member-storage">{membership.member?`${membership.member.displayName}님의 계정 찜 · 현재 검색 조건 적용 중`:'비회원 찜은 이 브라우저에 저장됩니다.'}{!membership.member&&<button onClick={()=>setAccountOpen(true)}>회원으로 시작하기</button>}</div>}
         {loading?<div className="empty" role="status"><div className="spinner"/><h3>같은 조건으로 금액을 계산하고 있어요</h3></div>:error?<div className="empty" role="alert"><CircleHelp size={30}/><h3>검색을 불러오지 못했어요</h3><p>{error}</p><button className="primary" onClick={()=>setRetry(retry+1)}>다시 시도</button></div>:visible.length===0?<div className="empty"><Search size={32}/><h3>{onlySaved?'아직 찜한 업체가 없어요':'조건에 맞는 예식장이 없어요'}</h3><p>지역과 예산 조건을 넓히거나 다른 인원으로 검색해 보세요.</p><button className="secondary" onClick={reset}>전체 조건으로 보기</button></div>:<div className="card-list">{visible.map((e,index)=><article className={`venue-card ${e.state==='UNAVAILABLE'?'unavailable':''}`} key={e.venue.id}>
-          <div className={`venue-cover cover-${e.venue.style}`}><span className="cover-label">{e.venue.style.toUpperCase()} WEDDING</span><span className="cover-name">{e.venue.hall}</span><span className="cover-bottom">YEON COLLECTION <span>0{index+1}</span></span><button className={`heart ${favorites.includes(e.venue.id)?'saved':''}`} aria-label={`${e.venue.name} ${favorites.includes(e.venue.id)?'찜 해제':'찜하기'}`} disabled={!membership.ready||membership.saving} aria-pressed={favorites.includes(e.venue.id)} onClick={()=>favorite(e.venue.id)}><Heart size={17} fill={favorites.includes(e.venue.id)?'currentColor':'none'}/></button></div>
+          <div className={`venue-cover cover-${e.venue.style}`}><span className="cover-label">{e.venue.style.toUpperCase()} WEDDING</span><span className="cover-name">{e.venue.hall}</span><span className="cover-bottom">ALL ABOUT WEDDING <span>0{index+1}</span></span><button className={`heart ${favorites.includes(e.venue.id)?'saved':''}`} aria-label={`${e.venue.name} ${favorites.includes(e.venue.id)?'찜 해제':'찜하기'}`} disabled={!membership.ready||membership.saving} aria-pressed={favorites.includes(e.venue.id)} onClick={()=>favorite(e.venue.id)}><Heart size={17} fill={favorites.includes(e.venue.id)?'currentColor':'none'}/></button></div>
           <div className="venue-body"><div className="venue-meta"><span><MapPin size={12}/>서울 {e.venue.region}</span><span>{e.venue.style} 예식</span>{complete[0]?.venue.id===e.venue.id&&criteria.sort==='price'&&<span className="best">조건 내 최저 총액</span>}</div><button className="venue-title" onClick={()=>setDetail(e)}>{e.venue.name}<ChevronRight size={18}/></button><p className="hall-name">{e.venue.hall} · 보증 {e.venue.guarantee}명 · 최대 {e.venue.capacity}명</p><div className="features">{e.venue.features.map(x=><span key={x}>{x}</span>)}</div><div className="review-note">등록된 후기 없음 <span>· 일정 확인 필요</span></div>
           <div className="price-row"><div><span className="price-caption">{e.state==='UNAVAILABLE'?'조건 미지원':e.state==='PARTIAL'?'확인된 비용 소계':'내 조건 예상 총액'}</span><div className={`price ${e.state==='PARTIAL'?'partial':''}`}>{e.state==='UNAVAILABLE'?'문의 필요':man(e.totalMax??e.knownSubtotal)}{e.state==='PARTIAL'&&<small>+ 미확인 비용</small>}</div></div><span className="meal">1인 식대 <strong>{won(e.venue.meal)}</strong></span></div>
           {e.unknownItems.length>0&&<p className="unknown">{e.unknownItems.join(' · ')}</p>}
@@ -80,7 +81,7 @@ export default function App() {
         </article>)}</div>}
         <p className="results-footnote">예상 총액은 예약·계약 확정 금액이 아닙니다. 보증금은 별도이며, 소인과 공휴일 특별요금은 이번 가상 계산에 포함되지 않습니다.</p>
       </section></div></>}
-      <footer><span className="footer-brand">연 <small>YEON</small></span><span>우리다운 결혼 준비, 함께 고르는 순간부터.</span><small>DEVELOPMENT PREVIEW · 2026</small></footer>
+      <footer><a href="/" className="site-brand" aria-label="All About Wedding 홈"><Brand/></a><span>우리다운 결혼 준비, 함께 고르는 순간부터.</span><small>DEVELOPMENT PREVIEW · 2026</small></footer>
     </main>
     {selected.length>0&&category==='예식장'&&<div className="compare-tray"><div className="tray-icon"><Scale size={22}/></div><div><strong>비교함 <span>{selected.length}/5</span></strong><p>{compared.map(e=>e.venue.name).join(' · ')}</p></div><button className="tray-clear" onClick={()=>setSelected([])}>비우기</button><button className="primary" disabled={selected.length<2||loading} onClick={()=>setCompareOpen(true)}>{selected.length<2?'한 곳 더 선택해 주세요':'한눈에 비교하기'}<ArrowRight size={16}/></button></div>}
     <dialog ref={dialog} className={compareOpen?'comparison-dialog':''} onCancel={()=>{setDetail(null);setCompareOpen(false);}} onClick={e=>{if(e.target===e.currentTarget){setDetail(null);setCompareOpen(false);}}}>

@@ -1,0 +1,58 @@
+name: Verify and deploy web preview
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: web-preview-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: for script in deploy/*.sh; do bash -n "$script"; done
+      - name: Prepare artifact
+        run: |
+          mkdir artifact
+          tar -czf artifact/web.tar.gz -C dist .
+          cd artifact
+          sha256sum web.tar.gz > web.tar.gz.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wedding-web
+          path: artifact/
+          retention-days: 7
+  deploy:
+    needs: verify
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.WEDDING_DEPLOY_ENABLED == 'true'
+    environment: preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: wedding-web
+          path: artifact
+      - name: Upload and switch web release
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_KEY: ${{ secrets.SERVER_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        run: bash deploy/push-release.sh "$GITHUB_SHA"

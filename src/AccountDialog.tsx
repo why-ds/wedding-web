@@ -36,7 +36,7 @@ export default function AccountDialog({member,ephemeral,count,onClose,onChanged,
   return <dialog ref={modal} className="account-dialog" aria-labelledby="account-title" onCancel={event=>{event.preventDefault();if(!busy)onClose();}} onClick={event=>{if(event.target===event.currentTarget&&!busy)onClose();}}>
     <button className="dialog-close" disabled={busy} onClick={onClose} aria-label="회원 창 닫기"><X size={20}/></button>
     <div className="account-mark"><UserRound size={25}/></div>
-    <div className="eyebrow">MY WEDDING, WITH YEON</div>
+    <div className="eyebrow">ALL ABOUT WEDDING · MY ACCOUNT</div>
     <h2 id="account-title">{mode==='profile'?`${member?.displayName??''}님의 공간`:mode==='register'?'우리의 준비를 시작해요':'다시 만나 반가워요'}</h2>
     <p className="account-subtitle">{mode==='profile'?'내 정보를 관리하고 마음에 든 공간을 모아두세요.':'마음에 드는 업체를 내 계정에 담아두세요.'}</p>
     {mode!=='profile'&&<div className="account-tabs" role="group" aria-label="회원 기능"><button disabled={busy} className={mode==='login'?'active':''} onClick={()=>switchMode('login')}>로그인</button><button disabled={busy} className={mode==='register'?'active':''} onClick={()=>switchMode('register')}>회원가입</button></div>}
