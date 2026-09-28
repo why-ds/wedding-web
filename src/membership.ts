@@ -40,8 +40,8 @@ export function useMembership(notify:(message:string)=>void) {
       if (version===generation.current) { setMember(session.member);setFavorites(ids);setEphemeral(session.ephemeral);setAvailable(true); }
     } catch (error) {
       if (version===generation.current) {
-        setMember(null);setFavorites(guestFavorites());setAvailable(false);
-        if(error instanceof MemberError && error.status===401) setAvailable(true);
+        // An unsuccessful server lookup must not masquerade as guest/local storage.
+        setMember(null);setFavorites([]);setAvailable(false);
       }
       throw error;
     } finally { if(version===generation.current) setReady(true); }
