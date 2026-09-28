@@ -25,7 +25,7 @@ export function initialCriteria(): Criteria {
 }
 export async function search(criteria: Criteria, signal: AbortSignal): Promise<SearchResponse> {
   const response = await fetch('/api/v1/searches', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(criteria), signal });
-  if (!response.ok) throw new Error(response.status === 400 ? '날짜와 인원 등 검색 조건을 확인해 주세요.' : '검색 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+  if (!response.ok) throw new Error(response.status === 422 ? '검색 대상이 많습니다. 지역·스타일·업체명을 추가해 주세요.' : response.status === 400 ? '날짜와 인원 등 검색 조건을 확인해 주세요.' : '검색 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.');
   const p = new URLSearchParams();
   for (const [key,value] of Object.entries(criteria)) if (value !== null && value !== '') p.set(key,String(value));
   history.replaceState(null,'',`?${p}`);

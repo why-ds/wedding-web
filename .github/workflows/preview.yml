@@ -24,6 +24,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: for script in deploy/*.sh; do bash -n "$script"; done
+      - run: python3 deploy/test_prune_releases.py
       - name: Prepare artifact
         run: |
           mkdir artifact
