@@ -13,7 +13,18 @@ export default function AccountDialog({member,ephemeral,count,onClose,onChanged,
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
   const modal=useRef<HTMLDialogElement>(null);
-  useEffect(()=>{modal.current?.showModal();},[]);
+  useEffect(()=>{
+    const dialog=modal.current;if(!dialog)return;
+    const viewport=window.visualViewport;
+    const fit=()=>{
+      dialog.style.setProperty('--account-viewport-height',`${viewport?.height??window.innerHeight}px`);
+      dialog.style.setProperty('--account-viewport-top',`${viewport?.offsetTop??0}px`);
+    };
+    fit();dialog.showModal();
+    viewport?.addEventListener('resize',fit);viewport?.addEventListener('scroll',fit);
+    window.addEventListener('resize',fit);
+    return()=>{viewport?.removeEventListener('resize',fit);viewport?.removeEventListener('scroll',fit);window.removeEventListener('resize',fit);dialog.close();};
+  },[]);
   useEffect(()=>{if(mode==='profile'&&!member){setMode('login');setPassword('');}},[member,mode]);
   function switchMode(next:'login'|'register') {setMode(next);setError('');setPassword('');setConfirmation('');}
   async function submit(event:FormEvent) {
@@ -33,13 +44,15 @@ export default function AccountDialog({member,ephemeral,count,onClose,onChanged,
     try{await memberRequest('/auth/logout','POST');await onChanged();notify('로그아웃했습니다.');onClose();}
     catch(err){setError(err instanceof Error?err.message:'로그아웃하지 못했습니다.');}finally{setBusy(false);}
   }
-  return <dialog ref={modal} className="account-dialog" aria-labelledby="account-title" onCancel={event=>{event.preventDefault();if(!busy)onClose();}} onClick={event=>{if(event.target===event.currentTarget&&!busy)onClose();}}>
+  return <dialog ref={modal} className="account-dialog" aria-labelledby="account-title" onCancel={event=>{event.preventDefault();if(!busy)onClose();}}>
+    <div className="account-dialog-header">
     <button className="dialog-close" disabled={busy} onClick={onClose} aria-label="회원 창 닫기"><X size={20}/></button>
     <div className="account-mark"><UserRound size={25}/></div>
     <div className="eyebrow">ALL ABOUT WEDDING · MY ACCOUNT</div>
     <h2 id="account-title">{mode==='profile'?`${member?.displayName??''}님의 공간`:mode==='register'?'우리의 준비를 시작해요':'다시 만나 반가워요'}</h2>
     <p className="account-subtitle">{mode==='profile'?'내 정보를 관리하고 마음에 든 공간을 모아두세요.':'마음에 드는 업체를 내 계정에 담아두세요.'}</p>
-    {mode!=='profile'&&<div className="account-tabs" role="group" aria-label="회원 기능"><button disabled={busy} className={mode==='login'?'active':''} onClick={()=>switchMode('login')}>로그인</button><button disabled={busy} className={mode==='register'?'active':''} onClick={()=>switchMode('register')}>회원가입</button></div>}
+    {mode!=='profile'&&<div className="account-tabs" role="group" aria-label="회원 기능"><button type="button" aria-pressed={mode==='login'} disabled={busy} className={mode==='login'?'active':''} onClick={()=>switchMode('login')}>로그인</button><button type="button" aria-pressed={mode==='register'} disabled={busy} className={mode==='register'?'active':''} onClick={()=>switchMode('register')}>회원가입</button></div>}
+    </div><div className="account-dialog-content">
     <form onSubmit={submit} className="account-form">
       <fieldset disabled={busy}>
         {mode==='profile'?<div className="account-email"><Mail size={16}/><div><strong>{member?.email}</strong><small>이메일 인증 전 · 이메일 변경은 준비 중</small></div></div>:<label>이메일<input type="email" required maxLength={254} autoComplete="username" placeholder="you@example.com" value={email} onChange={e=>setEmail(e.target.value)}/></label>}
@@ -54,5 +67,6 @@ export default function AccountDialog({member,ephemeral,count,onClose,onChanged,
     {mode==='profile'&&<button disabled={busy} className="logout-button" onClick={logout}><LogOut size={15}/>로그아웃</button>}
     <p className="account-storage-note">{ephemeral?'체험 모드: 회원 정보와 계정 찜은 서버 재시작 시 초기화됩니다. 테스트용 이메일과 비밀번호를 사용해 주세요.':'회원 정보와 계정 찜은 서버에 저장됩니다.'}</p>
     {mode!=='profile'&&<p className="account-guest-note">비회원으로 담은 찜은 이 브라우저에 따로 유지됩니다.<br/>이메일 인증·비밀번호 찾기는 아직 준비 중입니다.</p>}
+    </div>
   </dialog>;
 }
