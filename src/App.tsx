@@ -42,7 +42,7 @@ export default function App() {
   return <>
     <header className="header"><div className="header-inner">
       <a className="site-brand" href="/" aria-label="All About Wedding 홈"><Brand/><i>함께 고르는 결혼 준비</i></a>
-      <nav aria-label="주 메뉴"><button className={!onlySaved?'nav-active':''} onClick={()=>setOnlySaved(false)}>업체 둘러보기</button><button className={onlySaved?'nav-active':''} onClick={()=>setOnlySaved(true)}><Heart size={16}/>찜한 업체 <span>{favorites.length}</span></button></nav>
+      <nav aria-label="주 메뉴"><a href="/directory">공개 업체</a><button className={!onlySaved?'nav-active':''} onClick={()=>setOnlySaved(false)}>예식장 견적 체험</button><button className={onlySaved?'nav-active':''} onClick={()=>setOnlySaved(true)}><Heart size={16}/>찜한 업체 <span>{favorites.length}</span></button></nav>
       <button className="member-button" disabled={!membership.ready||membership.saving} onClick={()=>setAccountOpen(true)}><Users size={15}/><span>{!membership.ready?'확인 중…':membership.member?`${membership.member.displayName}님`:'로그인 · 회원가입'}</span></button>
       {membership.member?.admin&&<a className="member-button" href="/admin">관리자</a>}
       <span className="preview-label">PREVIEW <span>초안</span></span>
