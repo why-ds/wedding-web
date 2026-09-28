@@ -8,7 +8,7 @@ import { useMembership } from './membership';
 
 const won = (value: string | number) => `${Number(value).toLocaleString('ko-KR')}원`;
 const man = (value: string) => `${(Number(value)/10000).toLocaleString('ko-KR')}만원`;
-const categories = [{ name:'예식장', icon: Building2 },{ name:'스튜디오', icon: Camera },{ name:'드레스', icon: Flower2 },{ name:'메이크업', icon: Sparkles },{ name:'예물', icon: Gem },{ name:'한복', icon: Leaf },{ name:'예복', icon: Shirt }];
+const categories = [{code:'VENUE',name:'예식장',icon:Building2},{code:'STUDIO',name:'스튜디오',icon:Camera},{code:'DRESS',name:'드레스',icon:Flower2},{code:'MAKEUP',name:'메이크업',icon:Sparkles},{code:'JEWELRY',name:'예물',icon:Gem},{code:'HANBOK',name:'한복',icon:Leaf},{code:'SUIT',name:'예복',icon:Shirt},{code:'WEDDING_PHOTO',name:'본식스냅',icon:Camera},{code:'IPHONE_SNAP',name:'아이폰스냅',icon:Camera},{code:'WEDDING_VIDEO',name:'DVD·본식영상',icon:Camera}];
 
 export default function App() {
   const [draft,setDraft] = useState<Criteria>(initialCriteria);
@@ -25,7 +25,7 @@ export default function App() {
   const [accountOpen,setAccountOpen] = useState(false);
   const membership=useMembership(setToast);
   const {favorites,favorite}=membership;
-  const [category,setCategory] = useState('예식장');
+  const category='예식장';
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const abort = new AbortController(); setLoading(true); setError(''); setSelected([]); setDetail(null); setCompareOpen(false);
@@ -48,12 +48,11 @@ export default function App() {
       {membership.member?.admin&&<a className="member-button" href="/admin">관리자</a>}
       <span className="preview-label">PREVIEW <span>초안</span></span>
     </div></header>
-    <div className="category-bar"><div className="categories">{categories.map(({name,icon:Icon})=><button key={name} className={category===name?'active':''} onClick={()=>setCategory(name)}><Icon size={19}/>{name}{name!=='예식장'&&<small>준비 중</small>}</button>)}</div></div>
+    <div className="category-bar"><div className="categories">{categories.map(({code,name,icon:Icon})=><button key={code} className={category===name?'active':''} onClick={()=>{if(code==='VENUE')setOnlySaved(false);else location.assign('/preview/catalog?category='+code);}}><Icon size={19}/>{name}</button>)}</div></div>
     <main>
       <div className="breadcrumbs">결혼 준비 <ChevronRight size={12}/> 업체 비교 <ChevronRight size={12}/><strong>{category}</strong></div>
       <section className="page-intro"><div><div className="eyebrow">YOUR DAY, YOUR WAY</div><h1>우리의 시작에 맞는 {category}</h1><p>같은 조건으로 살펴보고, 포함된 구성까지 비교하세요.</p></div><div className="intro-note"><Leaf size={25}/><span>하나씩, 함께<br/><strong>더 나은 선택으로.</strong></span></div></section>
       <div className="demo-notice"><span>가상 데이터</span> 업체·금액·시설은 개발용 예시입니다. 실제 업체 정보나 예약 가능한 가격이 아닙니다.</div>
-      {category!=='예식장'?<section className="empty category-empty"><Sparkles size={35}/><h2>{category} 비교를 준비하고 있어요</h2><p>현재 초안에서는 예식장 검색과 총액 비교를 먼저 살펴볼 수 있습니다.</p><button className="primary" onClick={()=>setCategory('예식장')}>예식장 둘러보기 <ArrowRight size={16}/></button></section>:<>
       <form className="condition-bar" onSubmit={submit}>
         <label><MapPin size={18}/><span>희망 지역<select value={draft.region} onChange={e=>setDraft({...draft,region:e.target.value})}><option value="">서울 전체</option>{['강남','서초','송파','영등포'].map(x=><option key={x}>{x}</option>)}</select></span></label>
         <label><CalendarDays size={18}/><span>예식 날짜<input aria-label="예식 날짜" type="date" required min="2027-01-01" max="2027-12-31" value={draft.date} onChange={e=>setDraft({...draft,date:e.target.value})}/></span></label>
@@ -81,7 +80,7 @@ export default function App() {
           <div className="card-actions"><label><input type="checkbox" checked={selected.includes(e.venue.id)} onChange={()=>select(e.venue.id)}/>비교함에 담기</label><button onClick={()=>setDetail(e)}>구성·금액 자세히 <ArrowRight size={14}/></button></div></div>
         </article>)}</div>}
         <p className="results-footnote">예상 총액은 예약·계약 확정 금액이 아닙니다. 보증금은 별도이며, 소인과 공휴일 특별요금은 이번 가상 계산에 포함되지 않습니다.</p>
-      </section></div></>}
+      </section></div>
       <footer><a href="/" className="site-brand" aria-label="All About Wedding 홈"><Brand/></a><span>우리다운 결혼 준비, 함께 고르는 순간부터.</span><small>DEVELOPMENT PREVIEW · 2026</small></footer>
     </main>
     {selected.length>0&&category==='예식장'&&<div className="compare-tray"><div className="tray-icon"><Scale size={22}/></div><div><strong>비교함 <span>{selected.length}/5</span></strong><p>{compared.map(e=>e.venue.name).join(' · ')}</p></div><button className="tray-clear" onClick={()=>setSelected([])}>비우기</button><button className="primary" disabled={selected.length<2||loading} onClick={()=>setCompareOpen(true)}>{selected.length<2?'한 곳 더 선택해 주세요':'한눈에 비교하기'}<ArrowRight size={16}/></button></div>}
