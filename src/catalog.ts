@@ -1,4 +1,13 @@
 export const catalogCategories: Record<string,string> = {VENUE:'예식장',STUDIO:'스튜디오',DRESS:'드레스',MAKEUP:'메이크업',JEWELRY:'예물',HANBOK:'한복',SUIT:'예복',WEDDING_PHOTO:'본식스냅',IPHONE_SNAP:'아이폰스냅',WEDDING_VIDEO:'DVD·본식영상'};
-export type CatalogData = {externalKey:string;organizationName:string;branchName:string;category:string;region:string;address:string;publicPhone:string;sourceUrl:string};
+export type Parking = {spaces:number|null;freeMinutes:number|null;feeDescription:string|null;valetAvailable:boolean|null;accessDescription:string|null;shuttleDescription:string|null};
+export type CatalogPhoto = {url:string;caption:string;credit:string;sourceUrl:string;rights:'OWNED'|'PERMISSION'|'LICENSED';rightsConfirmed:boolean};
+export type ReferenceQuote = {title:string;serviceDate:string;startTime:string;guests:number|null;minimumGuests:number|null;amount:number;taxStatus:'INCLUDED'|'EXCLUDED'|'UNKNOWN';included:string;excluded:string;conditions:string;sourceUrl:string;checkedOn:string;validUntil:string|null};
+export type CatalogDetails = {description:string;parking:Parking;photos:CatalogPhoto[];quotes:ReferenceQuote[]};
+export type CatalogData = {externalKey:string;organizationName:string;branchName:string;category:string;region:string;address:string;publicPhone:string;sourceUrl:string;details?:CatalogDetails};
 export type CatalogDraft = {id:string;data:CatalogData;status:'DRAFT'|'ARCHIVED';version:number;updatedAt:string};
 export type Publication = {draftId:string;listingId:string;data:CatalogData;status:string;draftVersion:number;version:number;reviewedOn:string;updatedAt:string};
+export type DirectoryEntry = {id:string;organizationName:string;branchName:string;category:string;region:string;address:string;publicPhone:string;sourceUrl:string;reviewedOn:string};
+export const emptyDetails=():CatalogDetails=>({description:'',parking:{spaces:null,freeMinutes:null,feeDescription:'',valetAvailable:null,accessDescription:'',shuttleDescription:''},photos:[],quotes:[]});
+export const koreanToday=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+export const weekday=(date:string)=>date?new Date(`${date}T00:00:00Z`).getUTCDay():-1;
+export const dateday=(date:string)=>date?`${date} (${['일','월','화','수','목','금','토'][weekday(date)]}요일)`:'';

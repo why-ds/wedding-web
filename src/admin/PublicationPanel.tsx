@@ -1,6 +1,8 @@
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {memberRequest} from '../membership';
-import {catalogCategories,type CatalogDraft,type Publication} from '../catalog';
+import {catalogCategories,emptyDetails,type CatalogDraft,type Publication} from '../catalog';
+
+import ListingDetails from '../ListingDetails';
 
 export function PublishDialog({draft,onClose,onDone}:{draft:CatalogDraft;onClose:()=>void;onDone:()=>void}){
   const dialog=useRef<HTMLDialogElement>(null);
@@ -13,10 +15,10 @@ export function PublishDialog({draft,onClose,onDone}:{draft:CatalogDraft;onClose
     await memberRequest(`/admin/catalog/${draft.id}/publish`,'POST',{version:draft.version,publicationVersion:publication?.version??null,reviewedOn,factsConfirmed:confirmed});onDone();
   }catch(e){setError(e instanceof Error?e.message:'게시하지 못했습니다.');}finally{setBusy(false);}}
   return <dialog ref={dialog} className="admin-editor" aria-labelledby="publish-title" onCancel={e=>{e.preventDefault();if(!busy)onClose();}}>
-    <h2 id="publish-title">업체 기본 정보 공개 검수</h2><p className="admin-editor-note">아래 정보가 누구에게나 공개됩니다. 사진·가격·후기는 이번 게시 대상에 포함되지 않습니다.</p>
+    <h2 id="publish-title">업체 상세 정보 공개 검수</h2><p className="admin-editor-note">아래 기본 정보와 등록된 사진·주차 조건·참고 견적이 함께 공개됩니다. 상세 미리보기를 펼쳐 전체 내용을 확인하세요.</p>
     <dl className="publication-review"><dt>업체 · 지점</dt><dd>{draft.data.organizationName} · {draft.data.branchName}</dd><dt>업종 · 지역</dt><dd>{catalogCategories[draft.data.category]} · {draft.data.region}</dd><dt>주소</dt><dd>{draft.data.address}</dd><dt>공개 연락처</dt><dd>{draft.data.publicPhone||'미등록'}</dd><dt>출처</dt><dd>{draft.data.sourceUrl?<a href={draft.data.sourceUrl} target="_blank" rel="noopener noreferrer">{draft.data.sourceUrl}</a>:'출처 URL이 없습니다. 초안을 먼저 수정해 주세요.'}</dd></dl>
-    {publication&&<p className="admin-editor-note">현재 {publication.status==='PUBLISHED'?'공개 중':'게시 중단'} · 승인된 초안 버전 {publication.draftVersion} → 이번 버전 {draft.version}</p>}
-    <form onSubmit={submit}><fieldset disabled={busy||!ready}><label>정보 확인일<input type="date" required value={reviewedOn} onChange={e=>setReviewedOn(e.target.value)}/></label><label className="publication-confirm"><input type="checkbox" required checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>최근 90일 이내 출처에서 기본 정보를 직접 확인했고 공개 연락처·주소임을 확인했습니다.</label>
+    <details className="publication-preview"><summary>사진·주차·참고 견적 공개 미리보기</summary><ListingDetails details={draft.data.details??emptyDetails()} preview/></details>{publication&&<p className="admin-editor-note">현재 {publication.status==='PUBLISHED'?'공개 중':'게시 중단'} · 승인된 초안 버전 {publication.draftVersion} → 이번 버전 {draft.version}</p>}
+    <form onSubmit={submit}><fieldset disabled={busy||!ready}><label>정보 확인일<input type="date" required value={reviewedOn} onChange={e=>setReviewedOn(e.target.value)}/></label><label className="publication-confirm"><input type="checkbox" required checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/>최근 90일 이내 출처에서 기본 정보·주차·견적 조건을 확인했고 사진 게시 권한과 공개 가능한 연락처·주소임을 확인했습니다.</label>
     {error&&<p className="admin-row-error" role="alert">{error}</p>}<button className="primary" disabled={!draft.data.sourceUrl||!confirmed} type="submit">{busy?'게시 중…':'확인한 정보 공개하기'}</button></fieldset></form>
     {!ready&&error&&<p role="alert">{error}</p>}<button className="secondary" disabled={busy} onClick={onClose}>닫기</button>
   </dialog>;
