@@ -8,7 +8,7 @@ function Photo({photo,demo}:{photo:CatalogPhoto;demo:boolean}){
     <figcaption><strong>{photo.caption}</strong><span>사진: {photo.credit} · {demo?'체험용 일러스트':<a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">출처 ↗</a>}</span></figcaption></figure>;
 }
 
-export default function ListingDetails({details,preview=false,demo=false}:{details:CatalogDetails;preview?:boolean;demo?:boolean}){
+export default function ListingDetails({details,preview=false,demo=false,showQuotes=true}:{details:CatalogDetails;preview?:boolean;demo?:boolean;showQuotes?:boolean}){
   const [date,setDate]=useState(''),[day,setDay]=useState(''),[time,setTime]=useState(''),[guests,setGuests]=useState('');
   const quotes=details.quotes.filter(q=>(!date||q.serviceDate===date)&&(!day||String(weekday(q.serviceDate))===day)&&(!time||q.startTime.slice(0,5)===time)&&(!guests||q.guests===Number(guests)));
   const p=details.parking,today=koreanToday();
@@ -25,7 +25,7 @@ export default function ListingDetails({details,preview=false,demo=false}:{detai
       <dt>주차장 진입 · 대체 주차</dt><dd>{p.accessDescription||'미확인'}</dd>
       <dt>셔틀 · 대중교통</dt><dd>{p.shuttleDescription||'미확인'}</dd>
     </dl><p className="detail-note">주차 대수는 등록된 시설 정보입니다. 행사 당일의 여유 공간을 보장하지 않습니다.</p></section>
-    <section className="detail-section"><div className="detail-section-heading"><h2>{demo?'조건별 가상 견적':'조건별 참고 견적'}</h2><span>{details.quotes.length}건</span></div>
+    {showQuotes&&<section className="detail-section"><div className="detail-section-heading"><h2>{demo?'조건별 가상 견적':'조건별 참고 견적'}</h2><span>{details.quotes.length}건</span></div>
       <p className="detail-note">등록된 날짜·시간·인원의 견적 사례입니다. 실시간 예약 가능 여부와 확정 계약 금액은 업체 확인이 필요합니다. 다른 조건으로 자동 환산하지 않습니다. 모든 시간은 한국 시간입니다.</p>
       {!preview&&details.quotes.length>0&&<div className="detail-quote-filters">
         <label>적용 날짜<input type="date" value={date} onChange={e=>{setDate(e.target.value);setDay('');}}/></label>
@@ -46,6 +46,6 @@ export default function ListingDetails({details,preview=false,demo=false}:{detai
           {demo?<p className="detail-note">실제 금액이 아닌 화면 확인용 가상 견적입니다.</p>:<a href={q.sourceUrl} target="_blank" rel="noopener noreferrer">이 견적의 출처 보기 ↗</a>}
         </article>;
       })}</div>}
-    </section>
+    </section>}
   </div>;
 }
