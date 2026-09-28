@@ -67,7 +67,7 @@ export default function AdminApp(){
       {tab==='published'&&<PublicationPanel/>}
       {tab==='storage'&&<StoragePanel/>}
       {tab==='audit'&&<section className="admin-panel"><div className="admin-panel-header"><h2><History size={17}/>최근 변경 이력</h2><button aria-label="이력 새로고침" onClick={()=>setReload(x=>x+1)}><RefreshCw size={16}/></button></div>{loading?<div className="admin-empty">이력을 불러오는 중입니다.</div>:audits.length===0?<div className="admin-empty"><History size={30}/><h3>아직 변경 내역이 없습니다.</h3></div>:<div className="admin-table-scroll"><table className="admin-table"><thead><tr><th>시각</th><th>작업</th><th>대상 ID</th><th>관리자 ID</th></tr></thead><tbody>{audits.map(a=><tr key={a.id}><td>{date(a.occurredAt)}</td><td>{messages[a.action]??a.action}</td><td className="admin-id">{a.targetId}</td><td className="admin-id">{a.actorId}</td></tr>)}</tbody></table></div>}</section>}
-      <footer className="admin-footer">ALL ABOUT WEDDING OPERATIONS<span>업체 상세 · 사진 · 조건별 참고 견적 검수</span></footer></main></div>
+      <footer className="admin-footer"><a href="/preview/catalog">업종별 더미 데이터 보기 ↗</a> ALL ABOUT WEDDING OPERATIONS<span>업체 상세 · 사진 · 조건별 참고 견적 검수</span></footer></main></div>
     {publishing&&<PublishDialog draft={publishing} onClose={()=>setPublishing(null)} onDone={()=>{setPublishing(null);setTab('published');setReload(x=>x+1);setNotice('업체 기본 정보를 공개했습니다.');}}/>}
     {editing&&<DraftEditor draft={editing==='new'?null:editing} busy={busy} onClose={()=>setEditing(null)} onSave={save}/>}
     {archiving&&<ArchiveDialog draft={archiving} busy={busy} error={error} onClose={()=>setArchiving(null)} onConfirm={archive}/>}
